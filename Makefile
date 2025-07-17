@@ -1,7 +1,7 @@
 # Go parameters
-BINARY_NAME=go-project-template
+BINARY_NAME=go-build-stats-from-pipe
 BINARY_UNIX=$(BINARY_NAME)_unix
-REPO=ghcr.io/dathan/go-project-template/go-project-template
+REPO=ghcr.io/dathan/go-build-stats-from-pipe/go-build-stats-from-pipe
 
 .PHONY: all
 all: lint test build
