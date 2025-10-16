@@ -35,18 +35,19 @@ func run(r io.Reader) error {
 		return fmt.Errorf("failed to decode json: %w", err)
 	}
 
-	nonNormalStats, maintenanceStats, maintenanceByTypeStats, nonNormalByModeStats, nonIncomeStats := processServers(servers)
-	printStats(nonNormalStats, maintenanceStats, maintenanceByTypeStats, nonNormalByModeStats, nonIncomeStats)
+	nonNormalStats, maintenanceStats, maintenanceByTypeStats, nonNormalByModeStats, nonIncomeStats, freezeEnvStats := processServers(servers)
+	printStats(nonNormalStats, maintenanceStats, maintenanceByTypeStats, nonNormalByModeStats, nonIncomeStats, freezeEnvStats)
 
 	return nil
 }
 
-func processServers(servers []Server) (map[string]int, map[string]int, map[string]map[string]int, map[string]map[string]int, map[string]int) {
+func processServers(servers []Server) (map[string]int, map[string]int, map[string]map[string]int, map[string]map[string]int, map[string]int, map[string]int) {
 	nonNormalStats := make(map[string]int)
 	maintenanceStats := make(map[string]int)
 	maintenanceByTypeStats := make(map[string]map[string]int)
 	nonNormalByModeStats := make(map[string]map[string]int)
 	nonIncomeStats := make(map[string]int)
+	freezeEnvStats := make(map[string]int)
 
 	for _, server := range servers {
 		if server.Mode != "AGENT_MODE_NORMAL" {
@@ -68,11 +69,15 @@ func processServers(servers []Server) (map[string]int, map[string]int, map[strin
 		if server.Mode == "AGENT_MODE_MAINTENANCE" || server.Mode == "AGENT_MODE_SETUP" || server.Mode == "AGENT_MODE_NOT_READY" {
 			nonIncomeStats[server.Location]++
 		}
+
+		if server.Mode == "AGENT_MODE_FREEZE_ENV" {
+			freezeEnvStats[server.Location]++
+		}
 	}
-	return nonNormalStats, maintenanceStats, maintenanceByTypeStats, nonNormalByModeStats, nonIncomeStats
+	return nonNormalStats, maintenanceStats, maintenanceByTypeStats, nonNormalByModeStats, nonIncomeStats, freezeEnvStats
 }
 
-func printStats(nonNormalStats, maintenanceStats map[string]int, maintenanceByTypeStats map[string]map[string]int, nonNormalByModeStats map[string]map[string]int, nonIncomeStats map[string]int) {
+func printStats(nonNormalStats, maintenanceStats map[string]int, maintenanceByTypeStats map[string]map[string]int, nonNormalByModeStats map[string]map[string]int, nonIncomeStats map[string]int, freezeEnvStats map[string]int) {
 	yellow := color.New(color.FgYellow).SprintFunc()
 	cyan := color.New(color.FgCyan).SprintFunc()
 	green := color.New(color.FgGreen).SprintFunc()
@@ -135,6 +140,27 @@ func printStats(nonNormalStats, maintenanceStats map[string]int, maintenanceByTy
 	})
 
 	for _, locationStat := range sortedNonIncomeLocations {
+		fmt.Printf("- %s: %s\n", green(locationStat.Name), red(locationStat.Count))
+	}
+
+	var freezeEnvCount int
+	for _, count := range freezeEnvStats {
+		freezeEnvCount += count
+	}
+
+	fmt.Printf(yellow("\nTotal servers in AGENT_MODE_FREEZE_ENV: %d\n"), freezeEnvCount)
+	fmt.Println(cyan("------------------------------------ "))
+	fmt.Println(cyan("Breakdown by location:"))
+
+	sortedFreezeEnvLocations := make([]stat, 0, len(freezeEnvStats))
+	for location, count := range freezeEnvStats {
+		sortedFreezeEnvLocations = append(sortedFreezeEnvLocations, stat{Name: location, Count: count})
+	}
+	sort.Slice(sortedFreezeEnvLocations, func(i, j int) bool {
+		return sortedFreezeEnvLocations[i].Count > sortedFreezeEnvLocations[j].Count
+	})
+
+	for _, locationStat := range sortedFreezeEnvLocations {
 		fmt.Printf("- %s: %s\n", green(locationStat.Name), red(locationStat.Count))
 	}
 
