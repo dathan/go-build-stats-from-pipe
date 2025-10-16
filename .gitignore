@@ -22,5 +22,4 @@ vendor
 # Ignore api dir
 api
 bin
-go-build-stats-from-pipe
 conf/sample.json
