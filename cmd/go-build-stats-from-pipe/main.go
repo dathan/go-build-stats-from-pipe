@@ -15,6 +15,7 @@ type Server struct {
 	Mode     string `json:"mode"`
 	Name     string `json:"name"`
 	Type     string `json:"type"`
+	Vms      string `json:"vms"`
 }
 
 type stat struct {
@@ -66,11 +67,11 @@ func processServers(servers []Server) (map[string]int, map[string]int, map[strin
 			maintenanceByTypeStats[server.Location][server.Type]++
 		}
 
-		if server.Mode == "AGENT_MODE_MAINTENANCE" || server.Mode == "AGENT_MODE_SETUP" || server.Mode == "AGENT_MODE_NOT_READY" {
+		if server.Mode == "AGENT_MODE_MAINTENANCE" || server.Mode == "AGENT_MODE_SETUP" || server.Mode == "AGENT_MODE_NOT_READY" || server.Vms == "" {
 			nonIncomeStats[server.Location]++
 		}
 
-		if server.Mode == "AGENT_MODE_FREEZE_ENV" {
+		if server.Mode == "AGENT_MODE_FREEZE_ENV" && server.Vms == "" {
 			freezeEnvStats[server.Location]++
 		}
 	}
@@ -148,7 +149,7 @@ func printStats(nonNormalStats, maintenanceStats map[string]int, maintenanceByTy
 		freezeEnvCount += count
 	}
 
-	fmt.Printf(yellow("\nTotal servers in AGENT_MODE_FREEZE_ENV: %d\n"), freezeEnvCount)
+	fmt.Printf(yellow("\nTotal servers in AGENT_MODE_FREEZE_ENV empty: %d\n"), freezeEnvCount)
 	fmt.Println(cyan("------------------------------------ "))
 	fmt.Println(cyan("Breakdown by location:"))
 
