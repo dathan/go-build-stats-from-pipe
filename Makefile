@@ -17,6 +17,14 @@ buildruntest: build build-linux customrun
 customrun:
 	./scripts/customrun.sh
 
+.PHONY: install
+install: build
+	go install ./cmd/$(BINARY_NAME)/	
+
+.PHONY: sign
+sign: build 
+	codesign --force --deep --sign Dathan-Go-Program-self-sign-cert ./bin/$(BINARY_NAME)
+
 .PHONY: build
 build:
 	go build -o ./bin ./cmd/...

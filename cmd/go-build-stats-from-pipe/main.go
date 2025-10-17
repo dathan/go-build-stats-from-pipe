@@ -67,7 +67,7 @@ func processServers(servers []Server) (map[string]int, map[string]int, map[strin
 			maintenanceByTypeStats[server.Location][server.Type]++
 		}
 
-		if server.Mode == "AGENT_MODE_MAINTENANCE" || server.Mode == "AGENT_MODE_SETUP" || server.Mode == "AGENT_MODE_NOT_READY" || server.Vms == "" {
+		if (server.Vms == "" && server.Mode != "AGENT_MODE_NORMAL") || server.Mode == "AGENT_MODE_MAINTENANCE" || server.Mode == "AGENT_MODE_SETUP" || server.Mode == "AGENT_MODE_NOT_READY" {
 			nonIncomeStats[server.Location]++
 		}
 
@@ -96,6 +96,7 @@ func printStats(nonNormalStats, maintenanceStats map[string]int, maintenanceByTy
 	sortedLocations := make([]stat, 0, len(nonNormalByModeStats))
 	for location, byMode := range nonNormalByModeStats {
 		var total int
+		total = 0
 		for _, count := range byMode {
 			total += count
 		}
@@ -128,7 +129,7 @@ func printStats(nonNormalStats, maintenanceStats map[string]int, maintenanceByTy
 		nonIncomeCount += count
 	}
 
-	fmt.Printf(yellow("\nTotal Servers not generating Income: %d\n"), nonIncomeCount)
+	fmt.Printf(yellow("\nTotal Servers that CANNOT generate Income: %d\n"), nonIncomeCount)
 	fmt.Println(cyan("------------------------------------"))
 	fmt.Println(cyan("Breakdown by location:"))
 
@@ -173,7 +174,7 @@ func printStats(nonNormalStats, maintenanceStats map[string]int, maintenanceByTy
 	fmt.Printf(yellow("\nTotal servers in AGENT_MODE_MAINTENANCE: %d\n"), maintenanceCount)
 	fmt.Println(cyan("------------------------------------"))
 	fmt.Println(cyan("Servers in AGENT_MODE_MAINTENANCE per location:"))
-	
+
 	sortedMaintenanceLocations := make([]stat, 0, len(maintenanceStats))
 	for location, count := range maintenanceStats {
 		sortedMaintenanceLocations = append(sortedMaintenanceLocations, stat{Name: location, Count: count})
@@ -188,7 +189,7 @@ func printStats(nonNormalStats, maintenanceStats map[string]int, maintenanceByTy
 
 	fmt.Println(cyan("\nServers in AGENT_MODE_MAINTENANCE per location and type:"))
 	fmt.Println(cyan("------------------------------------"))
-	
+
 	sortedMaintenanceTypeLocations := make([]stat, 0, len(maintenanceByTypeStats))
 	for location, byType := range maintenanceByTypeStats {
 		var total int

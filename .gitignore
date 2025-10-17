@@ -23,3 +23,6 @@ vendor
 api
 bin
 conf/sample.json
+
+# ignore binaries
+cmd/go-build-stats-from-pipe/go-build-stats-from-pipe
