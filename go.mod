@@ -1,4 +1,4 @@
-module github.com/dathan/go-build-stats-from-pipe
+module gitlab.com/crusoeenergy/island/infrastructure/go-build-stats-from-pipe
 
 go 1.20
 
